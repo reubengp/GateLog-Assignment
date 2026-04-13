@@ -73,12 +73,17 @@
                 <label class="field-group">
                     <span>Visit Date</span>
                     <input
-                        type="date"
+                        type="text"
                         name="visit_date"
                         id="visit-date"
-                        value="{{ today_date }}"
-                        min="{{ today_date }}"
+                        value="{{ today_display_date }}"
+                        placeholder="dd mm yyyy"
+                        inputmode="numeric"
+                        maxlength="10"
+                        pattern="([0-2][0-9]|3[0-1]) ([0][1-9]|1[0-2]) \d{4}"
                         data-error-required="Visit date is required."
+                        data-error-pattern="Visit date must be in dd mm yyyy format."
+                        data-min-date="{{ today_date }}"
                         required
                     >
                     <small class="field-error" data-error-for="visit-date"></small>
@@ -100,12 +105,36 @@
                 return field.dataset.errorRequired || "This field is required.";
             }
 
-            if (field.validity.patternMismatch || field.validity.tooShort || field.validity.tooLong) {
-                return field.dataset.errorPattern || "Please enter a valid value.";
+            if (field.id === "visit-date" && field.value.trim()) {
+                const parts = field.value.trim().split(/\s+/);
+                if (parts.length !== 3) {
+                    return field.dataset.errorPattern || "Please enter a valid value.";
+                }
+
+                const [day, month, year] = parts.map(Number);
+                const candidateDate = new Date(year, month - 1, day);
+                const isoValue = `${year.toString().padStart(4, "0")}-${month
+                    .toString()
+                    .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+
+                if (
+                    Number.isNaN(day) ||
+                    Number.isNaN(month) ||
+                    Number.isNaN(year) ||
+                    candidateDate.getFullYear() !== year ||
+                    candidateDate.getMonth() !== month - 1 ||
+                    candidateDate.getDate() !== day
+                ) {
+                    return "Please enter a real calendar date.";
+                }
+
+                if (isoValue < field.dataset.minDate) {
+                    return "Please choose today or a future date.";
+                }
             }
 
-            if (field.validity.rangeUnderflow) {
-                return "Please choose today or a future date.";
+            if (field.validity.patternMismatch || field.validity.tooShort || field.validity.tooLong) {
+                return field.dataset.errorPattern || "Please enter a valid value.";
             }
 
             return "";
