@@ -51,7 +51,7 @@
                             <span class="status-pill">{{ get_status(guest) }}</span>
                         </div>
                         <div class="guest-meta">
-                            <p><strong>Visit Date:</strong> {{ guest.visit_date }}</p>
+                            <p><strong>Visit Date:</strong> {{ format_visit_date(guest.visit_date) }}</p>
                             <p><strong>Flat:</strong> {{ guest.flat_number }}</p>
                             <p><strong>Entry:</strong> {{ guest.entry_time or "Pending" }}</p>
                             <p><strong>Exit:</strong> {{ guest.exit_time or "Pending" }}</p>

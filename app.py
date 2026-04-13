@@ -51,6 +51,17 @@ def current_date():
     return datetime.now().strftime("%Y-%m-%d")
 
 
+def format_visit_date(date_string):
+    """Convert stored ISO dates into dd mm yy for display."""
+    if not date_string:
+        return ""
+
+    try:
+        return datetime.strptime(date_string, "%Y-%m-%d").strftime("%d %m %y")
+    except ValueError:
+        return date_string
+
+
 def get_status(guest):
     """Compute guest status from entry and exit timestamps."""
     if not guest.get("entry_time"):
@@ -90,7 +101,7 @@ def sort_guests_by_flat(guests):
 
 @app.context_processor
 def inject_helpers():
-    return {"today_date": current_date()}
+    return {"today_date": current_date(), "format_visit_date": format_visit_date}
 
 
 @app.route("/", methods=["GET", "POST"])
