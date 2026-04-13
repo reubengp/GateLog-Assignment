@@ -52,8 +52,8 @@ def current_date():
 
 
 def today_display_date():
-    """Return today's date in dd mm yyyy format for form display."""
-    return datetime.now().strftime("%d %m %Y")
+    """Return today's date in dd/mm/yyyy format for form display."""
+    return datetime.now().strftime("%d/%m/%Y")
 
 
 def format_visit_date(date_string):
@@ -78,19 +78,6 @@ def format_timestamp(timestamp_string):
         )
     except ValueError:
         return timestamp_string
-
-
-def parse_display_date(date_string):
-    """Convert dd mm yyyy input into ISO format for storage."""
-    if not date_string:
-        return None
-
-    try:
-        return datetime.strptime(" ".join(date_string.split()), "%d %m %Y").strftime(
-            "%Y-%m-%d"
-        )
-    except ValueError:
-        return None
 
 
 def get_status(guest):
@@ -212,8 +199,7 @@ def add_guest():
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         phone = request.form.get("phone", "").strip()
-        visit_date_input = request.form.get("visit_date", "").strip()
-        visit_date = parse_display_date(visit_date_input)
+        visit_date = request.form.get("visit_date", "").strip()
         submitted_flat = request.form.get("flat_number", flat_number).strip().upper()
         today_iso = current_date()
 
@@ -227,10 +213,8 @@ def add_guest():
             flash("Phone number must be exactly 10 digits.", "error")
         elif not submitted_flat:
             flash("Flat number is required.", "error")
-        elif not visit_date_input:
-            flash("Visit date is required.", "error")
         elif not visit_date:
-            flash("Visit date must be in dd mm yyyy format.", "error")
+            flash("Visit date is required.", "error")
         elif visit_date < today_iso:
             flash("Visit date cannot be before today.", "error")
         else:
