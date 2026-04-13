@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GateLog Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-page">
+    <div class="page-shell">
+        <div class="auth-card">
+            <div class="brand-block">
+                <p class="brand-name">Gate Log</p>
+                <h1>Apartment Guest Register</h1>
+                <p class="subtext brand-subtext">Simple Resident and Security Access for Daily Guest Tracking.</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-stack">
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="form-panel active" id="resident-form">
+                <form method="post" class="form-grid">
+                    <input type="hidden" name="login_type" value="resident">
+                    <label>
+                        <span>Flat Number</span>
+                        <input type="text" name="flat_number" class="large-input" placeholder="Enter Flat Number" required>
+                    </label>
+                    <label>
+                        <span>Password</span>
+                        <div class="password-field">
+                            <input type="password" name="password" placeholder="Enter Password" required>
+                            <button type="button" class="toggle-password is-hidden" aria-label="Show password" title="Show password">
+                                <span class="eye-icon" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </label>
+                    <button type="submit" class="primary-button">Login as Resident</button>
+                </form>
+                <p class="login-switch">
+                    <button class="text-link" type="button" data-target="security-form" data-hide="resident-form">
+                        Security login
+                    </button>
+                </p>
+            </div>
+
+            <div class="form-panel" id="security-form">
+                <form method="post" class="form-grid">
+                    <input type="hidden" name="login_type" value="security">
+                    <label>
+                        <span>Security Name</span>
+                        <input type="text" name="security_name" placeholder="Enter Security Name" required>
+                    </label>
+                    <label>
+                        <span>Password</span>
+                        <div class="password-field">
+                            <input type="password" name="password" placeholder="Enter Password" required>
+                            <button type="button" class="toggle-password is-hidden" aria-label="Show password" title="Show password">
+                                <span class="eye-icon" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </label>
+                    <button type="submit" class="primary-button">Login as Security</button>
+                </form>
+                <p class="login-switch">
+                    <button class="text-link" type="button" data-target="resident-form" data-hide="security-form">
+                        Back to resident login
+                    </button>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const panels = document.querySelectorAll(".form-panel");
+        const toggleButtons = document.querySelectorAll(".toggle-password");
+        const switchButtons = document.querySelectorAll(".text-link");
+
+        switchButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                panels.forEach((panel) => panel.classList.remove("active"));
+                document.getElementById(button.dataset.target).classList.add("active");
+            });
+        });
+
+        toggleButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const input = button.previousElementSibling;
+                const isHidden = input.type === "password";
+                input.type = isHidden ? "text" : "password";
+                button.classList.toggle("is-hidden", !isHidden);
+                button.classList.toggle("is-visible", isHidden);
+                button.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+                button.setAttribute("title", isHidden ? "Hide password" : "Show password");
+            });
+        });
+    </script>
+</body>
+</html>

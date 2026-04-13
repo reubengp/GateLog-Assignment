@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-shell">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow section-badge">Resident Dashboard</p>
+                <h1>Welcome, {{ resident_name }}</h1>
+                <p class="subtext">Flat {{ flat_number }} guest records in one place.</p>
+            </div>
+            <div class="topbar-actions">
+                <a class="secondary-button" href="{{ url_for('add_guest') }}">Add Guest</a>
+                <div class="logout-flyout">
+                    <button type="button" class="ghost-button logout-trigger">Logout</button>
+                    <div class="logout-popover" hidden>
+                        <p>Logout from this session?</p>
+                        <div class="logout-popover-actions">
+                            <button type="button" class="ghost-button logout-cancel">Cancel</button>
+                            <a class="primary-button" href="{{ url_for('logout') }}">Confirm</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <section class="card-grid">
+            {% if guests %}
+                {% for guest in guests %}
+                    <article class="guest-card">
+                        <div class="guest-card-header">
+                            <div>
+                                <h2>{{ guest.name }}</h2>
+                                <p>{{ guest.phone or "No phone provided" }}</p>
+                            </div>
+                            <span class="status-pill">{{ get_status(guest) }}</span>
+                        </div>
+                        <div class="guest-meta">
+                            <p><strong>Visit Date:</strong> {{ guest.visit_date }}</p>
+                            <p><strong>Flat:</strong> {{ guest.flat_number }}</p>
+                            <p><strong>Entry:</strong> {{ guest.entry_time or "Pending" }}</p>
+                            <p><strong>Exit:</strong> {{ guest.exit_time or "Pending" }}</p>
+                        </div>
+                        <form method="post" action="{{ url_for('delete_guest', guest_id=guest.id) }}">
+                            <button type="submit" class="danger-button">Delete Guest</button>
+                        </form>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h2>No guests added yet</h2>
+                    <p>Start by adding a guest for an upcoming apartment visit.</p>
+                    <a class="primary-button inline-link" href="{{ url_for('add_guest') }}">Add First Guest</a>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</body>
+<script>
+    document.querySelectorAll(".logout-flyout").forEach((flyout) => {
+        const trigger = flyout.querySelector(".logout-trigger");
+        const popover = flyout.querySelector(".logout-popover");
+        const cancel = flyout.querySelector(".logout-cancel");
+
+        trigger.addEventListener("click", () => {
+            const isOpen = !popover.hasAttribute("hidden");
+            document.querySelectorAll(".logout-popover").forEach((item) => item.setAttribute("hidden", ""));
+            if (!isOpen) {
+                popover.removeAttribute("hidden");
+            }
+        });
+
+        cancel.addEventListener("click", () => {
+            popover.setAttribute("hidden", "");
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!flyout.contains(event.target)) {
+                popover.setAttribute("hidden", "");
+            }
+        });
+    });
+</script>
+</html>

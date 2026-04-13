@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Guest</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-shell narrow-shell">
+        <header class="topbar">
+            <div class="topbar-left">
+                <a class="icon-back-button" href="{{ url_for('resident_dashboard') }}" aria-label="Go back" title="Go back">
+                    &#8592;
+                </a>
+            </div>
+            <div class="topbar-center">
+                <p class="eyebrow section-badge">Add Guest</p>
+                <h1>Create a new visitor entry</h1>
+                <p class="subtext">Guest visits are linked to your apartment for security screening.</p>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <section class="form-card">
+            <form method="post" class="form-grid" id="add-guest-form" novalidate>
+                <label class="field-group">
+                    <span>Guest Name</span>
+                    <input
+                        type="text"
+                        name="name"
+                        id="guest-name"
+                        placeholder="Enter Guest Name"
+                        minlength="2"
+                        maxlength="50"
+                        pattern="[A-Za-z][A-Za-z\s.'-]{1,49}"
+                        data-error-required="Guest name is required."
+                        data-error-pattern="Name should be 2 to 50 characters and use letters only."
+                        required
+                    >
+                    <small class="field-error" data-error-for="guest-name"></small>
+                </label>
+                <label class="field-group">
+                    <span>Phone Number</span>
+                    <input
+                        type="tel"
+                        name="phone"
+                        id="guest-phone"
+                        placeholder="Enter Phone Number"
+                        inputmode="numeric"
+                        maxlength="10"
+                        pattern="[0-9]{10}"
+                        data-error-required="Phone number is required."
+                        data-error-pattern="Phone number must be exactly 10 digits."
+                        required
+                    >
+                    <small class="field-error" data-error-for="guest-phone"></small>
+                </label>
+                <label class="field-group">
+                    <span>Flat Number</span>
+                    <input type="text" value="{{ flat_number }}" readonly>
+                    <input type="hidden" name="flat_number" value="{{ flat_number }}">
+                </label>
+                <label class="field-group">
+                    <span>Visit Date</span>
+                    <input
+                        type="date"
+                        name="visit_date"
+                        id="visit-date"
+                        value="{{ today_date }}"
+                        min="{{ today_date }}"
+                        data-error-required="Visit date is required."
+                        required
+                    >
+                    <small class="field-error" data-error-for="visit-date"></small>
+                </label>
+                <button type="submit" class="primary-button" id="save-guest-button" disabled>Save Guest</button>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        const addGuestForm = document.getElementById("add-guest-form");
+        const saveGuestButton = document.getElementById("save-guest-button");
+        const fieldsToValidate = Array.from(
+            addGuestForm.querySelectorAll("input[required]:not([type='hidden'])")
+        );
+
+        function getErrorMessage(field) {
+            if (field.validity.valueMissing) {
+                return field.dataset.errorRequired || "This field is required.";
+            }
+
+            if (field.validity.patternMismatch || field.validity.tooShort || field.validity.tooLong) {
+                return field.dataset.errorPattern || "Please enter a valid value.";
+            }
+
+            if (field.validity.rangeUnderflow) {
+                return "Please choose today or a future date.";
+            }
+
+            return "";
+        }
+
+        function validateField(field) {
+            const errorElement = document.querySelector(`[data-error-for="${field.id}"]`);
+            const message = getErrorMessage(field);
+            field.classList.toggle("input-error", Boolean(message));
+            errorElement.textContent = message;
+            return !message;
+        }
+
+        function validateForm() {
+            const isValid = fieldsToValidate.every((field) => validateField(field));
+            saveGuestButton.disabled = !isValid;
+        }
+
+        fieldsToValidate.forEach((field) => {
+            field.addEventListener("input", () => validateForm());
+            field.addEventListener("blur", () => validateField(field));
+        });
+
+        addGuestForm.addEventListener("submit", (event) => {
+            const isValid = fieldsToValidate.every((field) => validateField(field));
+            saveGuestButton.disabled = !isValid;
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+
+        validateForm();
+    </script>
+</body>
+</html>

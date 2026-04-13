@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="dashboard-shell">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow section-badge">Security Dashboard</p>
+                <h1>Guest Records</h1>
+                <p class="subtext">Track arrivals and exits for every guest registered by residents.</p>
+            </div>
+            <div class="topbar-actions">
+                <div class="logout-flyout">
+                    <button type="button" class="ghost-button logout-trigger">Logout</button>
+                    <div class="logout-popover" hidden>
+                        <p>Logout from this session?</p>
+                        <div class="logout-popover-actions">
+                            <button type="button" class="ghost-button logout-cancel">Cancel</button>
+                            <a class="primary-button" href="{{ url_for('logout') }}">Confirm</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <section class="filter-card">
+            <form method="get" class="filter-form">
+                <label class="filter-field">
+                    <span class="filter-label">Filter by Flat Number</span>
+                    <select name="flat_number">
+                        <option value="">All Flats</option>
+                        {% for flat_number in flat_numbers %}
+                            <option value="{{ flat_number }}" {% if selected_flat == flat_number %}selected{% endif %}>
+                                {{ flat_number }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="filter-field search-field">
+                    <span class="filter-label">Search Records</span>
+                    <div class="search-input-wrap">
+                        <span class="search-icon" aria-hidden="true">&#128269;</span>
+                        <input
+                            type="search"
+                            name="search"
+                            value="{{ search_query }}"
+                            placeholder="Search by guest, flat, phone, date, or status"
+                        >
+                    </div>
+                </label>
+                <div class="filter-actions">
+                    <button type="submit" class="primary-button">Filter</button>
+                    <a class="ghost-button" href="{{ url_for('security_dashboard') }}">Reset</a>
+                </div>
+            </form>
+        </section>
+
+        <section class="card-grid">
+            {% if guests %}
+                {% for guest in guests %}
+                    <article class="guest-card">
+                        <div class="guest-card-header">
+                            <div>
+                                <h2>{{ guest.name }}</h2>
+                                <p>Flat {{ guest.flat_number }}</p>
+                            </div>
+                            <span class="status-pill">{{ get_status(guest) }}</span>
+                        </div>
+                        <div class="guest-meta">
+                            <p><strong>Visit Date:</strong> {{ guest.visit_date }}</p>
+                            <p><strong>Entry Time:</strong> {{ guest.entry_time or "Not marked" }}</p>
+                            <p><strong>Exit Time:</strong> {{ guest.exit_time or "Not marked" }}</p>
+                        </div>
+                        <div class="action-row">
+                            <form method="post" action="{{ url_for('mark_entry', guest_id=guest.id) }}">
+                                <button type="submit" class="primary-button" {% if guest.entry_time %}disabled{% endif %}>Mark Entry</button>
+                            </form>
+                            <form method="post" action="{{ url_for('mark_exit', guest_id=guest.id) }}">
+                                <button type="submit" class="secondary-button" {% if not guest.entry_time or guest.exit_time %}disabled{% endif %}>Mark Exit</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h2>No guest records available</h2>
+                    <p>Guest entries added by residents will appear here for security tracking.</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</body>
+<script>
+    document.querySelectorAll(".logout-flyout").forEach((flyout) => {
+        const trigger = flyout.querySelector(".logout-trigger");
+        const popover = flyout.querySelector(".logout-popover");
+        const cancel = flyout.querySelector(".logout-cancel");
+
+        trigger.addEventListener("click", () => {
+            const isOpen = !popover.hasAttribute("hidden");
+            document.querySelectorAll(".logout-popover").forEach((item) => item.setAttribute("hidden", ""));
+            if (!isOpen) {
+                popover.removeAttribute("hidden");
+            }
+        });
+
+        cancel.addEventListener("click", () => {
+            popover.setAttribute("hidden", "");
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!flyout.contains(event.target)) {
+                popover.setAttribute("hidden", "");
+            }
+        });
+    });
+</script>
+</html>
