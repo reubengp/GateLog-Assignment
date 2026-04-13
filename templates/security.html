@@ -83,8 +83,8 @@
                         </div>
                         <div class="guest-meta">
                             <p><strong>Visit Date:</strong> {{ format_visit_date(guest.visit_date) }}</p>
-                            <p><strong>Entry Time:</strong> {{ guest.entry_time or "Not marked" }}</p>
-                            <p><strong>Exit Time:</strong> {{ guest.exit_time or "Not marked" }}</p>
+                            <p><strong>Entry Time:</strong> {{ format_timestamp(guest.entry_time) or "Not marked" }}</p>
+                            <p><strong>Exit Time:</strong> {{ format_timestamp(guest.exit_time) or "Not marked" }}</p>
                         </div>
                         <div class="action-row">
                             <form method="post" action="{{ url_for('mark_entry', guest_id=guest.id) }}">

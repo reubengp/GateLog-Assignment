@@ -53,8 +53,8 @@
                         <div class="guest-meta">
                             <p><strong>Visit Date:</strong> {{ format_visit_date(guest.visit_date) }}</p>
                             <p><strong>Flat:</strong> {{ guest.flat_number }}</p>
-                            <p><strong>Entry:</strong> {{ guest.entry_time or "Pending" }}</p>
-                            <p><strong>Exit:</strong> {{ guest.exit_time or "Pending" }}</p>
+                            <p><strong>Entry:</strong> {{ format_timestamp(guest.entry_time) or "Pending" }}</p>
+                            <p><strong>Exit:</strong> {{ format_timestamp(guest.exit_time) or "Pending" }}</p>
                         </div>
                         <form method="post" action="{{ url_for('delete_guest', guest_id=guest.id) }}">
                             <button type="submit" class="danger-button">Delete Guest</button>
